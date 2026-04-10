@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Country Explorer</title>
+  <title>🌍 Country Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,11 +21,28 @@
       <option value="Europe">Europe</option>
       <option value="Africa">Africa</option>
       <option value="Americas">Americas</option>
+      <option value="Oceania">Oceania</option>
+    </select>
+
+    <select id="sort">
+      <option value="">Sort By</option>
+      <option value="name-asc">Name A-Z</option>
+      <option value="name-desc">Name Z-A</option>
+      <option value="pop-asc">Population ↑</option>
+      <option value="pop-desc">Population ↓</option>
     </select>
   </div>
+  <div class="theme-toggle">
+  <input type="checkbox" id="themeToggle">
+  <label for="themeToggle" class="toggle-label">
+    <span class="icon sun">☀️</span>
+    <span class="icon moon">🌙</span>
+    <span class="toggle-ball"></span>
+  </label>
+</div>
   <p id="loading">Loading...</p>
   <div id="countries"></div>
-
   <script src="script.js"></script>
+
 </body>
 </html>

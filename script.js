@@ -2,25 +2,27 @@ const container = document.getElementById("countries");
 const loading = document.getElementById("loading");
 const searchInput = document.getElementById("search");
 const regionFilter = document.getElementById("regionFilter");
+const sortSelect = document.getElementById("sort");
+const themeToggle = document.getElementById("themeToggle");
+
 let countriesData = [];
+let filteredData = []; 
 async function fetchCountries() {
   try {
     loading.style.display = "block";
 
     const res = await fetch("https://restcountries.com/v3.1/all?fields=name,flags,capital,region,population");
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch data");
-    }
+    if (!res.ok) throw new Error("Failed to fetch data");
 
     const data = await res.json();
 
-    if (!Array.isArray(data)) {
-      throw new Error("Invalid data format");
-    }
+    if (!Array.isArray(data)) throw new Error("Invalid data format");
 
     countriesData = data;
-    displayCountries(countriesData);
+    filteredData = data; 
+
+    displayCountries(filteredData);
 
     loading.style.display = "none";
   } catch (error) {
@@ -30,6 +32,11 @@ async function fetchCountries() {
 }
 function displayCountries(countries) {
   container.innerHTML = "";
+
+  if (countries.length === 0) {
+    container.innerHTML = "<p>No countries found</p>";
+    return;
+  }
 
   countries.forEach(country => {
     const card = document.createElement("div");
@@ -41,7 +48,16 @@ function displayCountries(countries) {
       <p><strong>Capital:</strong> ${country.capital?.[0] || "N/A"}</p>
       <p><strong>Region:</strong> ${country.region}</p>
       <p><strong>Population:</strong> ${country.population.toLocaleString()}</p>
+      <button class="fav-btn">⭐ Favorite</button>
     `;
+
+    const favBtn = card.querySelector(".fav-btn");
+    favBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      favBtn.classList.toggle("active");
+    });
+
+    
     card.addEventListener("click", () => {
       alert(
         `Country: ${country.name.common}
@@ -54,27 +70,40 @@ Population: ${country.population.toLocaleString()}`
     container.appendChild(card);
   });
 }
-searchInput.addEventListener("input", () => {
-  const value = searchInput.value.toLowerCase();
+function applyFilters() {
+  let result = [...countriesData];
 
-  const filtered = countriesData.filter(country =>
-    country.name.common.toLowerCase().includes(value)
-  );
-
-  displayCountries(filtered);
-});
-
-regionFilter.addEventListener("change", () => {
-  const region = regionFilter.value;
-  filterRegion(region);
-});
-function filterRegion(region) {
-  let filtered = countriesData;
-
-  if (region) {
-    filtered = countriesData.filter(c => c.region === region);
+  const searchValue = searchInput.value.toLowerCase();
+  if (searchValue) {
+    result = result.filter(c =>
+      c.name.common.toLowerCase().includes(searchValue)
+    );
   }
 
-  displayCountries(filtered);
+  const regionValue = regionFilter.value;
+  if (regionValue) {
+    result = result.filter(c => c.region === regionValue);
+  }
+
+  const sortValue = sortSelect.value;
+  if (sortValue === "name-asc") {
+    result.sort((a, b) => a.name.common.localeCompare(b.name.common));
+  } else if (sortValue === "name-desc") {
+    result.sort((a, b) => b.name.common.localeCompare(a.name.common));
+  } else if (sortValue === "pop-asc") {
+    result.sort((a, b) => a.population - b.population);
+  } else if (sortValue === "pop-desc") {
+    result.sort((a, b) => b.population - a.population);
+  }
+
+  filteredData = result;
+  displayCountries(filteredData);
 }
+searchInput.addEventListener("input", applyFilters);
+regionFilter.addEventListener("change", applyFilters);
+sortSelect.addEventListener("change", applyFilters);
+themeToggle.addEventListener("change", () => {
+  document.body.classList.toggle("dark");
+});
+
 fetchCountries();
